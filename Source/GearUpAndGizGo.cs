@@ -29,12 +29,15 @@ namespace GearUpAndGo
 		{
 			Log.Message($"GearUpAndGo to {target}, setting {policy}");
 
-			if (!Event.current.alt)
+			if (!Event.current.alt && Settings.Get().useBetterPawnControl)
 				Current.Game.GetComponent<GearUpPolicyComp>().Set(policy);
 
 			foreach (Pawn p in Find.Selector.SelectedObjects
 				.Where(o => o is Pawn p && p.IsColonistPlayerControlled).Cast<Pawn>())
 			{
+				if (!Event.current.alt && !Settings.Get().useBetterPawnControl)
+					Current.Game.GetComponent<GearUpPolicyComp>().Set(policy, p);
+
 				p.jobs.TryTakeOrderedJob(new Job(GearUpAndGoJobDefOf.GearUpAndGo, target), JobTag.DraftedOrder);
 			}
 		}
@@ -82,12 +85,14 @@ namespace GearUpAndGo
 	public class GearUpPolicyComp : GameComponent
 	{
 		public string lastPolicy = "";
+		public Dictionary<string, int> lastPoliciesOnPawns = new Dictionary<string, int>();
 
 		public GearUpPolicyComp(Game game) { }
 
 		public override void ExposeData()
 		{
 			Scribe_Values.Look(ref lastPolicy, "lastPolicy", "");
+			Scribe_Collections.Look(ref lastPoliciesOnPawns, "lastPoliciesOnPawns", LookMode.Value, LookMode.Value);
 		}
 		public void Set(string policy)
 		{
@@ -97,11 +102,39 @@ namespace GearUpAndGo
 			}
 			SetBetterPawnControl.SetPawnControlPolicy(policy ?? Settings.Get().betterPawnControlBattlePolicy);
 		}
+	public void Set(string policy, Pawn pawn)
+	{
+	  if (lastPolicy == "")
+	  {
+			lastPolicy = SetBetterPawnControl.CurrentPolicy();
+	  }
+	  if (lastPoliciesOnPawns == null || lastPoliciesOnPawns.GetType() != typeof(Dictionary<string, int>)) lastPoliciesOnPawns = new Dictionary<string, int>();
+
+	  Log.Message($"{lastPolicy.ToString() ?? "Null"} - {lastPoliciesOnPawns.ToString() ?? "Null"} - {pawn.ToString() ?? "Null"} - {pawn.ThingID ?? "Null"}");
+	  if (!lastPoliciesOnPawns.ContainsKey(pawn.ThingID))
+	  {
+			lastPoliciesOnPawns[pawn.ThingID] = Current.Game.outfitDatabase.AllOutfits.IndexOf(pawn.outfits.CurrentOutfit);
+			pawn.outfits.CurrentOutfit = Current.Game.outfitDatabase.AllOutfits.Find(dat => dat.label == Settings.Get().betterPawnControlBattlePolicy);
+	  }
+	}
 		public void Revert()
 		{
 			if (lastPolicy == "") return;
 
-			SetBetterPawnControl.SetPawnControlPolicy(lastPolicy);
+			if(Settings.Get().useBetterPawnControl)
+			{
+				SetBetterPawnControl.SetPawnControlPolicy(lastPolicy);
+			}
+			else
+			{
+				if(lastPoliciesOnPawns == null || lastPoliciesOnPawns.GetType() != typeof(Dictionary<string,int>)) lastPoliciesOnPawns = new Dictionary<string, int>();
+
+				foreach (KeyValuePair<string, int> value in lastPoliciesOnPawns.ToList())
+				{
+					Find.CurrentMap.mapPawns.FreeColonists.Find(dat => dat.ThingID == value.Key).outfits.CurrentOutfit = Current.Game.outfitDatabase.AllOutfits[value.Value];
+					lastPoliciesOnPawns.Remove(value.Key);
+				}
+			}
 
 			lastPolicy = "";
 		}

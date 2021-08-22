@@ -8,6 +8,7 @@ namespace GearUpAndGo
 {
 	class Settings : ModSettings
 	{
+		public bool useBetterPawnControl = true;
 		public string betterPawnControlBattlePolicy = "";
 
 		public static Settings Get()
@@ -21,6 +22,7 @@ namespace GearUpAndGo
 			options.Begin(wrect);
 
 			options.Label("TD.SettingBetterPawnControlPolicy".Translate());
+			options.CheckboxLabeled("TD.SettingUseBetterPawnControl".Translate(), ref useBetterPawnControl);
 			betterPawnControlBattlePolicy = options.TextEntry(betterPawnControlBattlePolicy, 1);
 			options.Label("TD.SettingBetterPawnControlRemembered".Translate());
 			options.Gap();
@@ -30,6 +32,7 @@ namespace GearUpAndGo
 		
 		public override void ExposeData()
 		{
+			Scribe_Values.Look(ref useBetterPawnControl, "useBetterPawnControl", true);
 			Scribe_Values.Look(ref betterPawnControlBattlePolicy, "betterPawnControlBattlePolicy", "");
 		}
 	}
