@@ -7,6 +7,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using HarmonyLib;
+using UnityEngine;
 
 namespace GearUpAndGo
 {
@@ -62,6 +63,8 @@ namespace GearUpAndGo
 				//Okay, nothing to do, go to target
 				if (result == ThinkResult.NoJob)
 				{
+					Debug.Log(TargetA == null ? "Null" : "Not null");
+					Debug.Log(pawn == null ? "Null" : "Not null");
 					IntVec3 intVec = RCellFinder.BestOrderedGotoDestNear(TargetA.Cell, pawn);
 					Job job = new Job(JobDefOf.Goto, intVec);
 					if (pawn.Map.exitMapGrid.IsExitCell(UI.MouseCell()))

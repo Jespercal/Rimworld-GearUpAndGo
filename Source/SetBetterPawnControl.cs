@@ -46,6 +46,19 @@ namespace GearUpAndGo
 				Stop(e);
 			}
 		}
+		public static void SetSpecificPawnControlPolicy(List<Pawn> pawns, string policyName)
+		{
+			if (!working) return;
+
+			try
+			{
+				SetPawnControlPolicyEx2(pawns, policyName);
+			}
+			catch (Exception e)
+			{
+				Stop(e);
+			}
+		}
 
 		private static void SetPawnControlPolicyEx(string policyName)
 		{
@@ -55,6 +68,16 @@ namespace GearUpAndGo
 			{
 				Log.Message($"using policy: {policy}");
 				BetterPawnControl.AssignManager.LoadState(policy);
+			}
+		}
+		public static void SetPawnControlPolicyEx2(List<Pawn> pawns, string policyName)
+		{
+			BetterPawnControl.Policy policy = BetterPawnControl.AssignManager.policies.FirstOrDefault(p => p.label == policyName);
+
+			if (policy != null)
+			{
+				Log.Message($"using policy: {policy}");
+				BetterPawnControl.AssignManager.LoadState(BetterPawnControl.AssignManager.links, pawns, policy);
 			}
 		}
 
