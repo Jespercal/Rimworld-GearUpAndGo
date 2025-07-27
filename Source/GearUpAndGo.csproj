@@ -54,9 +54,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Connected Services\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="C:\Users\CHAP6\source\repos\Jespercal\BetterPawnControl\Source\BetterPawnControl.csproj">
       <Project>{1546cfa0-a290-4a38-ad7c-4a1e6ad8c845}</Project>
       <Name>BetterPawnControl</Name>

@@ -50,6 +50,9 @@ namespace GearUpAndGo
 			foreach (Pawn p in Find.Selector.SelectedObjects
 				.Where(o => o is Pawn p && p.IsColonistPlayerControlled && p.Map.uniqueID == currentMapId).Cast<Pawn>())
 			{
+				if (!Event.current.alt && !Settings.Get().useBetterPawnControl)
+					Current.Game.GetComponent<GearUpPolicyComp>().Set(policy, p);
+
 				p.jobs.TryTakeOrderedJob(new Job(GearUpAndGoJobDefOf.GearUpAndGo, target), JobTag.DraftedOrder);
 			}
 		}
@@ -93,6 +96,7 @@ namespace GearUpAndGo
 		public static GearUpPolicyComp comp;
 
 		public string lastPolicy = "";
+		public Dictionary<string, int> lastPoliciesOnPawns = new Dictionary<string, int>();
 
 		public Dictionary<Pawn, bool> isGearedUp = new Dictionary<Pawn, bool>();
 
